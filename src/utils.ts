@@ -18,8 +18,6 @@ export function openNote(filePath: string) {
 export function createNoteIfNotExists(directory: string | null, title: string) {
     const filePath = getNotePath(directory, title);
 
-    console.log("Creating note at path:", filePath);
-
     if (existsSync(filePath)) {
         // already exists, do nothing.
         return filePath;
@@ -122,6 +120,7 @@ export function addTask(title: string) {
 
 export type Task = {
     title: string;
+    date: string | null;
     line: string;
     lineNumber: number;
     done: boolean;
@@ -135,14 +134,17 @@ export function useTasks(): Task[] {
     return lines.map((line, index): Task | null => {
         const match = line.match(/^- \[( |x)\] (.+)/);
         if (!match) return null;
-        const tasky = {
-            title: match[2],
+
+        const dateMatch = match[2].match(/^\[(\d{4}-\d{2}-\d{2})\] (.+)/);
+        const title = dateMatch ? dateMatch[2] : match[2];
+        const date = dateMatch ? dateMatch[1] : null;
+
+        return {
+            title,
+            date,
             line,
             lineNumber: index,
             done: match[1] === "x",
         };
-
-        console.log(tasky)
-        return tasky
     }).filter(task => task && !task.done) as Task[];
 }
